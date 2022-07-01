@@ -1,0 +1,3 @@
+./test picture1.bmp 0 0 4 100
+./test picture2.bmp 0 0 4 200
+./test picture3.bmp 0 0.5 1 200

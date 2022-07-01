@@ -1,0 +1,152 @@
+\documentclass[twocolumn]{ctexart}
+\usepackage{lipsum,mwe,cuted}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{fancyhdr}
+\usepackage{amsthm}
+\pagestyle{fancy}
+\usepackage{listings}
+\usepackage{enumerate}
+
+\usepackage{geometry}
+\geometry{a4paper,scale=0.8}
+\title{\textbf{Manderbrot Set 的生成和探索}}
+\author{ 邵盛栋  \\\ 信息与计算科学 3200103951 }
+\date{\vspace{-2em}}
+
+\stripsep 8pt
+\pagestyle{plain}
+\newtheorem{thm}{定理}
+\bibliographystyle{unsrt}
+\ctexset{section={format={\Large\bfseries}}}
+\newcommand{\upcite}[1]{\textsuperscript{\textsuperscript{\cite{#1}}}}
+
+
+\begin{document}
+	
+	\maketitle
+	
+	\begin{strip}
+		
+		\noindent  \textbf{摘要} \quad 对于Mandelbrot集，它展示了一个精细且无限复杂的边界，随着放大倍数的增加，它会显示出越来越精细的递归细节，本文将在研究Mandelbrot集的基础上，首先探究Mandelbrot集的理论知识，寻找适当的算法并利用C++语言编写程序，最终实现Mandelbrot集可视化。
+		\\
+	\end{strip}
+	
+	
+	\section*{1  引言}
+	Mandelbrot集是复平面中c值的集合，其临界点的轨道为$z=0$在二次映射的迭代下
+	\[z_{n+1}=z_{n}^{2}+c\]
+	仍然有界。因此，复数c是Mandelbrot集中的元素，不妨假设开始时$z_{0}=0$，在一次次迭代后$|z_{n}|$对于任意$n>0$有界，则对应的$c$即属于Mandelbrot集。
+	
+	例如，对于$c=1$，序列是$ 0,1,2,5,26,\dots $，趋于无穷，则说明1不是Mandelbrot集中的元素；另一方面，对于$ c=-1 $，序列是$ 0,-1,0,-1,0,\dots $，是有界的，则说明-1是Mandelbrot集中的元素\cite{devaney2006unveiling}。
+	\section*{2 问题背景}
+	Mandelbrot集起源于复动力学，这是20世纪初法国数学Pierre Fatou和Gaston Julia首次研究的领域。1978年，罗伯特·W·布鲁克斯和彼得·马特尔斯基首次定义并绘制了这种分形，作为Kleinian groups研究的一部分。1980年3月1日，Benoit Mandelbrot在纽约约克镇高地的IBM托马斯J.沃森研究中心首次看到了该集合的可视化。
+	
+	Mandelbrot在1980年发表的一篇文章中研究了二次多项式的参数空间。Mandelbrot集的数学研究真正始于数学家Adrien Douady和John H. Hubbard (1985)的工作，他们建立了许多其基本属性,并命名该集合以纪念Mandelbrot在分形几何方面的有影响的工作。
+	
+	1985年8月的《科学美国人》的封面文章向广大读者介绍了计算Mandelbrot集的算法。封面由不来梅大学的Peitgen 、Richter 和Saupe创作。Mandelbrot集在1980年代中期作为计算机图形演示变得突出，当时个人计算机变得足够强大，可以以高分辨率绘制和显示该集。
+	\section*{3 数学理论}
+	Mandelbrot集是一个紧集，由于它是闭合的并且包含在以原点为圆心的半径为2的闭合圆中，即点c属于Mandelbrot集当且仅当$ |z_{n}|\leq2 $对于所有$ n\geq0 $有界\cite{douady1986julia}，则有如下定理：
+	\begin{thm} 
+	$ 0 $的轨道趋向于无穷大当且仅当在某个点它的模$ \textgreater2 $。
+	\end{thm}
+	
+	该定理可分为以下两个定理：
+	\begin{thm} 
+		若$ c\in M $，则$ |c|\leq 2 $。
+	\end{thm}
+	\begin{thm} 
+		若$ c\in M $，则$ |z_{n}|\leq 2,(n=1,2,\dots) $。
+	\end{thm}
+	下面是对定理三的证明：
+	\begin{proof}
+		要证明若$ |z_{n}|>2,(n=1,2,\dots) $，则$ c\notin M $\\
+		首先分别讨论$ |c|>2 $与$ |c|\leq 2 $两种情形\\
+		由定理2，$ z_{n}>2,(n=1,2,\dots) $且$ |c|>2 $时，$ c\notin M $.\\
+		接着要证明$ |c|\leq 2 $时的情况：\\
+		假设$ |z_{n}|>2 $，因为$ |c|\leq 2 $，所以$ |z_{n}|>|c| $，而\\
+		\[|z_{n+1}|=|z_{n}^{2}+c|\geq|z_{n}^{2}|-|c|=|z_{n}|^{2}-|c|\]
+		因为$ |z_{n}|>|c| $\\
+		\[|z_{n}|^{2}-|c|>|z_{n}|^{2}-|z_{n}|\]
+		由$ |z_{n}|>2 $，左右同乘$ |z_{n}| $再减去$ |z_{n}| $可得到下式\\
+		\[|z_{n}|^{2}-|z_{n}|>2|z_{n}|-|z_{n}|=|z_{n}|\]
+		由以上可知$ |z_{n+1}|>|z_{n}| $\\
+		由数学归纳法可知$ 2<|z_{n}|<|z_{n+1}|<|z_{n+2}|<\dots $，可以看出随着迭代次数的增加$ |z_{n}| $递增并且发散。\\
+		所以在$ |z_{n}|>2,(n=1,2,\dots) $且$ |c|\leq 2 $的情况下也是则$ c\notin M $。\\
+		综上所述，若存在$ |z_{n}|>2 $，则$ c\notin M $
+	\end{proof}
+	该定理只适用于$ z\mapsto z^{2}+c $，但通过修改边界值2，可以适用于其他多项式族。这里的边界值不取决于c，但在其他多项式族中可能取决于c\cite{weisstein2002mandelbrot}。
+
+	\section*{4 算法}
+	算法伪代码如下：
+	\begin{verbatim}
+	Choose a maximal iteration number N
+	For each pixel p of the image:
+	  Let c be the complex number represented 
+	  by p
+	  Let z be a complex variable
+	  Set z to 0
+	  Do the following N times:    
+		  	  If |z|>2 then color the pixel white, 
+		  	  end this loop prematurely, go to the
+		  	  next pixel Otherwise replace z by 
+	     z*z+c
+	  If the loop above reached its natural
+	  end: 
+	  color the pixel p in black
+	  Go to the next pixel
+	\end{verbatim}
+	利用C++实现算法的具体流程为：
+	\begin{enumerate}[(1)] 
+		\item 创建bmp图像文件（通过RGB三种颜色显现的图像），图像中的像素可作为坐标轴当中的点，并给定原点坐标；
+		\item 定义一种迭代形式，来检验对应的点c是发散还是收敛；
+		\item 检验图像中的每一个点（像素），并对收敛和发散的点进行不同的着色处理，绘制形成目标图像。
+	\end{enumerate}
+	
+	\section*{5 数值算例}
+	设置ox，oy，dimension与迭代次数N分别为0,0,4,100，在run文件中输入如下命令
+	\begin{verbatim}
+		./test picture1.bmp 0 0 4 100
+	\end{verbatim}
+	可得到picture1，如图\ref{fig:1}所示。
+	
+	我们可以调节N的大小来得到更加精细的Mandelbrot集的图案，不妨设置N的值为200，即在run文件中输入命令：
+	\begin{verbatim}
+		./test picture1.bmp 0 0 4 200
+	\end{verbatim}
+	可得到picture2，如图\ref{fig:2}所示。
+	
+	我们还可以通过调节ox，oy，dimension的值来观察Mandelbrot集的细节部分，在run中输入如下命令：
+	\begin{verbatim}
+		./test picture1.bmp 0 0 4 200
+	\end{verbatim}
+	从而得到想要观察的位置的放大图，如图\ref{fig:3}所示。
+	
+	最后，我们还可以改变图案的颜色，使其更加美观，可视化效果更好，如图\ref{fig:4}所示。
+    \begin{figure}[htbp]
+      	\includegraphics[width=\linewidth]{picture1.bmp}
+      	      	\caption{picture1}
+      	\label{fig:1}
+    \end{figure}
+ 	\begin{figure}[htbp]
+ 		\includegraphics[width=\linewidth]{picture2.bmp}
+ 		\caption{picture2}
+ 		\label{fig:2}
+ 	\end{figure}
+ 	\begin{figure}[htbp]
+ 		\includegraphics[width=\linewidth]{picture3.bmp}
+ 		\caption{picture3}
+ 		\label{fig:3}
+ 	\end{figure}
+ 	\begin{figure}[htbp]
+ 		\includegraphics[width=\linewidth]{picture4.bmp}
+ 		\caption{picture4}
+ 		\label{fig:4}
+ 	\end{figure}
+ 
+	\section*{6 结论}
+	Mandelbrot集的迭代次数可间接反映发散程度，本文中的代码将收敛与发散两种不同情况进行区分，并赋予黑色与白色两种颜色的值，由此得到可视化效果效果。在此基础上，我们仍可以通过改变维数以及迭代次数，得到一些新的研究思路与方法。
+	
+	\bibliographystyle{unsrt}
+	\bibliography{literature}
+\end{document}
