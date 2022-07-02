@@ -10,12 +10,19 @@
 
 \usepackage{geometry}
 \geometry{a4paper,scale=0.8}
+
 \title{\textbf{Manderbrot Set 的生成和探索}}
 \author{ 邵盛栋  \\\ 信息与计算科学 3200103951 }
 \date{\vspace{-2em}}
 
 \stripsep 8pt
-\pagestyle{plain}
+%\pagestyle{plain}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Homework4}\rhead{Manderbrot Set 的生成和探索}%设置页眉
+\pagenumbering{arabic}
+\lfoot{}%这条语句可以让页码出现在下方
+\setlength\headwidth{\textwidth}%
 \newtheorem{thm}{定理}
 \bibliographystyle{unsrt}
 \ctexset{section={format={\Large\bfseries}}}
